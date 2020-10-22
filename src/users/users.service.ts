@@ -6,12 +6,13 @@ import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import * as jwt from 'jsonwebtoken';
+import { JwtService } from 'src/jwt/jwt.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
-    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async createAccount({
@@ -47,10 +48,7 @@ export class UsersService {
         return { ok: false, error: 'Wrong password' };
       }
       // Todo: Create JWT and give it to user
-      const token = jwt.sign(
-        { id: user.id },
-        this.configService.get('SECRET_KEY'),
-      );
+      const token = this.jwtService.sign(user.id);
       return { ok: true, token };
     } catch (error) {
       return { ok: false, error };
