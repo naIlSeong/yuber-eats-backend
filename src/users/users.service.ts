@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
-import * as jwt from 'jsonwebtoken';
 import { JwtService } from 'src/jwt/jwt.service';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
     private readonly jwtService: JwtService,
@@ -53,5 +51,9 @@ export class UsersService {
     } catch (error) {
       return { ok: false, error };
     }
+  }
+
+  findById(id: number): Promise<User> {
+    return this.usersRepo.findOne({ id });
   }
 }
