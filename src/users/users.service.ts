@@ -46,7 +46,10 @@ export class UserService {
     password,
   }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
     try {
-      const user = await this.userRepo.findOne({ email });
+      const user = await this.userRepo.findOne(
+        { email },
+        { select: ['password', 'id'] },
+      );
       if (!user) {
         return { ok: false, error: 'User not found' };
       }
@@ -54,7 +57,6 @@ export class UserService {
       if (!passwordCorrect) {
         return { ok: false, error: 'Wrong password' };
       }
-      // Todo: Create JWT and give it to user
       const token = this.jwtService.sign(user.id);
       return { ok: true, token };
     } catch (error) {
@@ -80,5 +82,23 @@ export class UserService {
       user.password = password;
     }
     return this.userRepo.save(user);
+  }
+
+  async verifyEmail(code: string): Promise<boolean> {
+    try {
+      const verification = await this.verification.findOne(
+        { code },
+        { relations: ['user'] },
+      );
+      if (verification) {
+        verification.user.verified = true;
+        this.userRepo.save(verification.user);
+        return true;
+      }
+      throw Error();
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 }
