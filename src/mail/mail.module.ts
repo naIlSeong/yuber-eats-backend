@@ -15,7 +15,7 @@ export class MailModule {
         },
         MailService,
       ],
-      exports: [],
+      exports: [MailService],
     };
   }
 }
