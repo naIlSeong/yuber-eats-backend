@@ -1,13 +1,12 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { UsersModule } from 'src/users/users.module';
-import { CONFIG_OPTIONS } from './jwt.constant';
-import { jwtModuleOptions } from './jwt.interface';
+import { CONFIG_OPTIONS } from 'src/common/common.constant';
+import { JwtModuleOptions } from './jwt.interface';
 import { JwtService } from './jwt.service';
 
 @Module({})
 @Global()
 export class JwtModule {
-  static forRoot(options: jwtModuleOptions): DynamicModule {
+  static forRoot(options: JwtModuleOptions): DynamicModule {
     return {
       module: JwtModule,
       providers: [
@@ -17,7 +16,6 @@ export class JwtModule {
         },
         JwtService,
       ],
-      imports: [UsersModule],
       exports: [JwtService],
     };
   }

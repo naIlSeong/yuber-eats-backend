@@ -91,7 +91,6 @@ export class UserService {
   ): Promise<EditProfileOutput> {
     try {
       const user = await this.userRepo.findOne(userId);
-      console.log(user);
       if (email) {
         user.email = email;
         user.verified = false;
@@ -100,7 +99,7 @@ export class UserService {
       if (password) {
         user.password = password;
       }
-      this.userRepo.save(user);
+      await this.userRepo.save(user);
       return {
         ok: true,
       };
@@ -120,7 +119,8 @@ export class UserService {
       );
       if (verification) {
         verification.user.verified = true;
-        this.userRepo.save(verification.user);
+        await this.userRepo.save(verification.user);
+        await this.verification.delete(verification.id);
         return { ok: true };
       }
       return {
