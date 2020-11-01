@@ -87,7 +87,6 @@ export class UserService {
     }
   }
 
-  // Todo : Fix It ⚠️
   async editProfile(
     userId: number,
     { email, password }: EditProfileInput,
