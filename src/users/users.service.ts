@@ -32,11 +32,15 @@ export class UserService {
     try {
       const exists = await this.userRepo.findOne({ email });
       if (exists) {
-        return { ok: false, error: 'There is a user with that email already' };
+        return {
+          ok: false,
+          error: 'There is a user with that email already',
+        };
       }
       const user = await this.userRepo.save(
         this.userRepo.create({ email, password, role }),
       );
+
       const verification = await this.verification.save(
         this.verification.create({
           user,
@@ -45,7 +49,10 @@ export class UserService {
       this.mailService.sendVerificationEmail(user.email, verification.code);
       return { ok: true };
     } catch (e) {
-      return { ok: false, error: "Couldn't create account" };
+      return {
+        ok: false,
+        error: "Couldn't create account",
+      };
     }
   }
 
@@ -56,16 +63,27 @@ export class UserService {
         { select: ['password', 'id'] },
       );
       if (!user) {
-        return { ok: false, error: 'User not found' };
+        return {
+          ok: false,
+          error: 'User not found',
+        };
       }
+
       const passwordCorrect = await user.checkPassword(password);
       if (!passwordCorrect) {
-        return { ok: false, error: 'Wrong password' };
+        return {
+          ok: false,
+          error: 'Wrong password',
+        };
       }
+
       const token = this.jwtService.sign(user.id);
       return { ok: true, token };
     } catch (error) {
-      return { ok: false, error: "Can't login now" };
+      return {
+        ok: false,
+        error: "Can't login now",
+      };
     }
   }
 
