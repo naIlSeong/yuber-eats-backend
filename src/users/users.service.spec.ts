@@ -13,6 +13,7 @@ const mockRepository = () => ({
   save: jest.fn(),
   create: jest.fn(),
   findOneOrFail: jest.fn(),
+  delete: jest.fn(),
 });
 
 const mockJwtService = () => ({
@@ -272,5 +273,50 @@ describe('UserService', () => {
     });
   });
 
-  it.todo('verifyEmail');
+  describe('verifyEmail', () => {
+    const mockedVerification = {
+      user: { verified: true },
+      id: 1,
+    };
+    it('should verify email', async () => {
+      verificationRepo.findOne.mockResolvedValue(mockedVerification);
+      const result = await service.verifyEmail('');
+
+      expect(verificationRepo.findOne).toHaveBeenCalledTimes(1);
+      expect(verificationRepo.findOne).toHaveBeenCalledWith(
+        { code: '' },
+        expect.any(Object),
+      );
+
+      expect(userRepo.save).toHaveBeenCalledTimes(1);
+      expect(userRepo.save).toHaveBeenCalledWith({ verified: true });
+
+      expect(verificationRepo.delete).toHaveBeenCalledTimes(1);
+      expect(verificationRepo.delete).toHaveBeenCalledWith(
+        mockedVerification.id,
+      );
+
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should fail on verification not found', async () => {
+      verificationRepo.findOne.mockResolvedValue(undefined);
+      const result = await service.verifyEmail('');
+
+      expect(result).toEqual({
+        ok: false,
+        error: 'Verification not found',
+      });
+    });
+
+    it('should fail on exception', async () => {
+      verificationRepo.findOne.mockRejectedValue(new Error());
+      const result = await service.verifyEmail('');
+
+      expect(result).toEqual({
+        ok: false,
+        error: "Can't edit profile now",
+      });
+    });
+  });
 });
