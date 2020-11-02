@@ -1,8 +1,17 @@
 import { Test } from '@nestjs/testing';
 import { CONFIG_OPTIONS } from 'src/common/common.constant';
 import { JwtService } from './jwt.service';
+import * as jwt from 'jsonwebtoken';
 
 const TEST_KEY = 'testKey';
+const USER_ID = 1;
+
+jest.mock('jsonwebtoken', () => {
+  return {
+    sign: jest.fn(() => 'MOCK_TOKEN'),
+    verify: jest.fn(() => ({ id: USER_ID })),
+  };
+});
 
 describe('JwtService', () => {
   let service: JwtService;
@@ -24,6 +33,26 @@ describe('JwtService', () => {
     expect(service).toBeDefined();
   });
 
-  it.todo('sign');
-  it.todo('verify');
+  describe('sign', () => {
+    it('should return a signed token', () => {
+      const token = service.sign(USER_ID);
+
+      expect(jwt.sign).toHaveBeenCalledTimes(1);
+      expect(jwt.sign).toHaveBeenCalledWith({ id: USER_ID }, TEST_KEY);
+
+      expect(typeof token).toBe('string');
+    });
+  });
+
+  describe('verify', () => {
+    it('should return the decoded', () => {
+      const TOKEN = 'TOKEN';
+      const decodedToken = service.verify(TOKEN);
+
+      expect(jwt.verify).toHaveBeenCalledTimes(1);
+      expect(jwt.verify).toHaveBeenCalledWith(TOKEN, TEST_KEY);
+
+      expect(decodedToken).toEqual({ id: USER_ID });
+    });
+  });
 });
