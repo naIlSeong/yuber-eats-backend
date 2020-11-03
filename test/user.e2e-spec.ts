@@ -54,8 +54,13 @@ describe('UserModule (e2e)', () => {
         })
         .expect(200)
         .expect(res => {
-          expect(res.body.data.createAccount.ok).toBe(true);
-          expect(res.body.data.createAccount.error).toBe(null);
+          const {
+            body: {
+              data: { createAccount },
+            },
+          } = res;
+          expect(createAccount.ok).toBe(true);
+          expect(createAccount.error).toBe(null);
         });
     });
 
@@ -77,8 +82,13 @@ describe('UserModule (e2e)', () => {
         })
         .expect(200)
         .expect(res => {
-          expect(res.body.data.createAccount.ok).toBe(false);
-          expect(res.body.data.createAccount.error).toBe(
+          const {
+            body: {
+              data: { createAccount },
+            },
+          } = res;
+          expect(createAccount.ok).toBe(false);
+          expect(createAccount.error).toBe(
             'There is a user with that email already',
           );
         });
