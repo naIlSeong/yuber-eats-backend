@@ -283,6 +283,125 @@ describe('UserModule (e2e)', () => {
     });
   });
 
+  describe('editProfile', () => {
+    const NEW_EMAIL = 'new@email.com';
+    const NEW_PASSWORD = 'newpassword123';
+
+    it('should change email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+            mutation {
+              editProfile(input: {
+                email: "${NEW_EMAIL}"
+              }) {
+                ok
+                error
+              }
+            }`,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should change password', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+          mutation {
+            editProfile(input: {
+              password: "${NEW_PASSWORD}"
+            }) {
+              ok
+              error
+            }
+          }`,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should have new email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+    {
+      me{
+        email
+      }
+    }`,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res;
+          expect(email).toBe(NEW_EMAIL);
+        });
+    });
+
+    it('should success to login with new password and email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+          mutation {
+            login(input:{
+              email: "${NEW_EMAIL}",
+              password: "${NEW_PASSWORD}"
+            }) {
+              ok
+              error
+              token
+            }
+          }`,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                login: { ok, error, token },
+              },
+            },
+          } = res;
+          jwtToken = token;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+          expect(token).toBe(jwtToken);
+        });
+    });
+  });
+
   it.todo('verifyEmail');
-  it.todo('editProfile');
 });
