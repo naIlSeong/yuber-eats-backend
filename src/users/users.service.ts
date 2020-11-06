@@ -107,6 +107,14 @@ export class UserService {
     { email, password }: EditProfileInput,
   ): Promise<EditProfileOutput> {
     try {
+      const existUser = await this.userRepo.findOne({ email });
+      if (existUser) {
+        return {
+          ok: false,
+          error: 'There are already users using this email',
+        };
+      }
+
       const user = await this.userRepo.findOne(userId);
       if (email) {
         user.email = email;

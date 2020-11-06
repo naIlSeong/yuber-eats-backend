@@ -264,6 +264,30 @@ describe('UserModule (e2e)', () => {
     const NEW_EMAIL = 'new@email.com';
     const NEW_PASSWORD = 'newpassword123';
 
+    it('should fail with exist email', () => {
+      return privateTest(`
+        mutation {
+          editProfile(input: {
+            email: "${testUser.email}"
+          }) {
+            ok
+            error
+          }
+        }`)
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(false);
+          expect(error).toBe('There are already users using this email');
+        });
+    });
+
     it('should change email', () => {
       return privateTest(`
           mutation {
