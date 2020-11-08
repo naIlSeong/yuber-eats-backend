@@ -211,11 +211,18 @@ describe('UserService', () => {
         email: 'mock@mail.com',
         verified: true,
       };
+      const newUser = {
+        userId: 2,
+        email: oldUser.email,
+      };
 
       userRepo.findOne.mockResolvedValue({ email: oldUser.email });
-      const result = await service.editProfile(oldUser.userId, {
-        email: oldUser.email,
+      const result = await service.editProfile(newUser.userId, {
+        email: newUser.email,
       });
+
+      expect(userRepo.findOne).toBeCalledTimes(1);
+      expect(userRepo.findOne).toBeCalledWith({ email: newUser.email });
 
       expect(result).toEqual({
         ok: false,
@@ -240,7 +247,7 @@ describe('UserService', () => {
         verified: false,
       };
 
-      userRepo.findOne.mockResolvedValue(oldUser);
+      userRepo.findOneOrFail.mockResolvedValue(oldUser);
       verificationRepo.create.mockReturnValue(newVerification);
       verificationRepo.save.mockResolvedValue(newVerification);
       mailService.sendVerificationEmail(
@@ -249,19 +256,19 @@ describe('UserService', () => {
       );
       await service.editProfile(editProfileArgs.userId, editProfileArgs.input);
 
-      expect(userRepo.findOne).toBeCalledTimes(1);
-      // expect(userRepo.findOne).toBeCalledWith(editProfileArgs.userId);
+      expect(userRepo.findOneOrFail).toBeCalledTimes(1);
+      expect(userRepo.findOneOrFail).toBeCalledWith(editProfileArgs.userId);
 
-      // expect(verificationRepo.create).toBeCalledWith({ user: newUser });
-      // expect(verificationRepo.save).toBeCalledWith(newVerification);
+      expect(verificationRepo.create).toBeCalledWith({ user: newUser });
+      expect(verificationRepo.save).toBeCalledWith(newVerification);
 
       expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
         newUser.email,
         newVerification.code,
       );
 
-      // expect(userRepo.save).toHaveBeenCalledTimes(1);
-      // expect(userRepo.save).toHaveBeenCalledWith(newUser);
+      expect(userRepo.save).toHaveBeenCalledTimes(1);
+      expect(userRepo.save).toHaveBeenCalledWith(newUser);
     });
 
     it('should change password', async () => {
@@ -270,20 +277,23 @@ describe('UserService', () => {
         input: { password: 'newpassword' },
       };
 
-      userRepo.findOne.mockResolvedValue({ password: 'oldpassword' });
+      userRepo.findOneOrFail.mockResolvedValue({ password: 'oldpassword' });
       const result = await service.editProfile(
         editProfileArgs.userId,
         editProfileArgs.input,
       );
 
-      // expect(userRepo.save).toHaveBeenCalledTimes(1);
-      // expect(userRepo.save).toHaveBeenCalledWith(editProfileArgs.input);
+      expect(userRepo.findOneOrFail).toBeCalledTimes(1);
+      expect(userRepo.findOneOrFail).toBeCalledWith(editProfileArgs.userId);
 
-      // expect(result).toEqual({ ok: true });
+      expect(userRepo.save).toHaveBeenCalledTimes(1);
+      expect(userRepo.save).toHaveBeenCalledWith(editProfileArgs.input);
+
+      expect(result).toEqual({ ok: true });
     });
 
     it('should fail on exception', async () => {
-      userRepo.findOne.mockRejectedValue(new Error());
+      userRepo.findOneOrFail.mockRejectedValue(new Error());
       const result = await service.editProfile(1, { email: '', password: '' });
 
       expect(result).toEqual({ ok: false, error: "Can't edit profile now" });

@@ -115,7 +115,7 @@ export class UserService {
         };
       }
 
-      const user = await this.userRepo.findOne(userId);
+      const user = await this.userRepo.findOneOrFail(userId);
       if (email) {
         user.email = email;
         user.verified = false;
