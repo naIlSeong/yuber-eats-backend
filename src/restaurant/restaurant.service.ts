@@ -20,6 +20,10 @@ import {
   EditRestaurantInput,
   EditRestaurantOutput,
 } from './dtos/edit-restaurant.dto';
+import {
+  RestaurantDetailInput,
+  RestaurantDetailOutput,
+} from './dtos/restaurant-detail.dto';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repository/category.repository';
@@ -186,6 +190,29 @@ export class RestaurantService {
         ok: true,
         results: restaurants,
         totalPages: Math.ceil(totalResults / 25),
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Unexpected error',
+      };
+    }
+  }
+
+  async restaurantDetail({
+    restaurantId,
+  }: RestaurantDetailInput): Promise<RestaurantDetailOutput> {
+    try {
+      const restaurant = await this.restaurantRepo.findOne(restaurantId);
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: 'Restaurant not found',
+        };
+      }
+      return {
+        ok: true,
+        restaurant,
       };
     } catch (error) {
       return {
