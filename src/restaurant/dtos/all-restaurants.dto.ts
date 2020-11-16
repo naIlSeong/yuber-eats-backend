@@ -11,5 +11,5 @@ export class AllRestaurantsInput extends PaginationInput {}
 @ObjectType()
 export class AllRestaurantsOutput extends PaginationOutput {
   @Field(type => [Restaurant], { nullable: true })
-  results?: Restaurant[];
+  restaurants?: Restaurant[];
 }

@@ -49,7 +49,7 @@ export class RestaurantResolver {
   async createRestaurant(
     @Args('input') createRestaurantInput: CreateRestaurantInput,
     @AuthUser() authUser: User,
-  ) {
+  ): Promise<CreateRestaurantOutput> {
     return this.restaurantService.createRestaurant(
       authUser,
       createRestaurantInput,
@@ -104,7 +104,7 @@ export class CategoryResolver {
   constructor(private readonly restaurantService: RestaurantService) {}
 
   @ResolveField(returns => Int)
-  restaurantCount(@Parent() category: Category): Promise<number> {
+  countRestaurant(@Parent() category: Category): Promise<number> {
     return this.restaurantService.countRestaurant(category);
   }
 

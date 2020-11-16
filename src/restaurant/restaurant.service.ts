@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Like, Raw, Repository } from 'typeorm';
+import { Raw, Repository } from 'typeorm';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import {
   AllRestaurantsInput,
@@ -54,7 +54,10 @@ export class RestaurantService {
       await this.restaurantRepo.save(newRestaurant);
       return { ok: true };
     } catch (error) {
-      return { ok: false, error: "Couldn't create restaurant" };
+      return {
+        ok: false,
+        error: 'Unexpected error',
+      };
     }
   }
 
@@ -193,7 +196,7 @@ export class RestaurantService {
       });
       return {
         ok: true,
-        results: restaurants,
+        restaurants,
         totalResults,
         totalPages: Math.ceil(totalResults / 25),
       };
