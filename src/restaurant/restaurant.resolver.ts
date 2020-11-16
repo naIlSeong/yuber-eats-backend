@@ -11,6 +11,10 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import {
+  AllRestaurantsInput,
+  AllRestaurantsOutput,
+} from './dtos/all-restaurants.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateRestaurantInput,
@@ -63,6 +67,13 @@ export class RestaurantResolver {
       owner,
       deleteRestaurantInput,
     );
+  }
+
+  @Query(returns => AllRestaurantsOutput)
+  async allRestaurants(
+    @Args('input') allRestaurantsInput: AllRestaurantsInput,
+  ): Promise<AllRestaurantsOutput> {
+    return this.restaurantService.allRestaurants(allRestaurantsInput);
   }
 }
 

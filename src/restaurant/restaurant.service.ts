@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import {
+  AllRestaurantsInput,
+  AllRestaurantsOutput,
+} from './dtos/all-restaurants.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateRestaurantInput,
@@ -153,11 +157,35 @@ export class RestaurantService {
         skip: (page - 1) * 25,
       });
       const totalRestaurants = await this.countRestaurant(category);
-      category.restaurants = restaurants;
       return {
         ok: true,
         category,
         totalPages: Math.ceil(totalRestaurants / 25),
+        restaurants,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Unexpected error',
+      };
+    }
+  }
+
+  async allRestaurants({
+    page,
+  }: AllRestaurantsInput): Promise<AllRestaurantsOutput> {
+    try {
+      const [
+        restaurants,
+        totalResults,
+      ] = await this.restaurantRepo.findAndCount({
+        take: 25,
+        skip: (page - 1) * 25,
+      });
+      return {
+        ok: true,
+        results: restaurants,
+        totalPages: Math.ceil(totalResults / 25),
       };
     } catch (error) {
       return {
