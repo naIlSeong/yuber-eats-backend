@@ -32,6 +32,10 @@ import {
   RestaurantDetailInput,
   RestaurantDetailOutput,
 } from './dtos/restaurant-detail.dto';
+import {
+  SearchRestaurantInput,
+  SearchRestaurantOutput,
+} from './dtos/search-restaurant.dto';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { RestaurantService } from './restaurant.service';
@@ -85,6 +89,13 @@ export class RestaurantResolver {
     @Args('input') restaurantDetailInput: RestaurantDetailInput,
   ): Promise<RestaurantDetailOutput> {
     return this.restaurantService.restaurantDetail(restaurantDetailInput);
+  }
+
+  @Query(returns => SearchRestaurantOutput)
+  async searchRestaurant(
+    @Args('input') searchRestaurantInput: SearchRestaurantInput,
+  ): Promise<SearchRestaurantOutput> {
+    return this.restaurantService.searchRestaurant(searchRestaurantInput);
   }
 }
 
