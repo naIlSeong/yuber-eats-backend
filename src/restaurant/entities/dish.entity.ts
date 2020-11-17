@@ -52,12 +52,12 @@ export class Dish extends CoreEntity {
   @Length(4, 144)
   description: string;
 
+  @Field(type => Restaurant)
   @ManyToOne(
     type => Restaurant,
     restaurant => restaurant.menu,
     { onDelete: 'CASCADE' },
   )
-  @Field(type => Restaurant)
   restaurant: Restaurant;
 
   @RelationId((dish: Dish) => dish.restaurant)
