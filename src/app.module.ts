@@ -18,6 +18,7 @@ import { Restaurant } from './restaurant/entities/restaurant.entity';
 import { RestaurantModule } from './restaurant/restaurant.module';
 import { Category } from './restaurant/entities/category.entity';
 import { AuthModule } from './auth/auth.module';
+import { Dish } from './restaurant/entities/dish.entity';
 
 @Module({
   imports: [
@@ -54,7 +55,7 @@ import { AuthModule } from './auth/auth.module';
       synchronize: process.env.NODE_ENV !== 'prod',
       logging:
         process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
-      entities: [User, Verification, Restaurant, Category],
+      entities: [User, Verification, Restaurant, Category, Dish],
     }),
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
