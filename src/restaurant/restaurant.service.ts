@@ -8,6 +8,7 @@ import {
   AllRestaurantsOutput,
 } from './dtos/all-restaurants.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
+import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -29,6 +30,7 @@ import {
   SearchRestaurantOutput,
 } from './dtos/search-restaurant.dto';
 import { Category } from './entities/category.entity';
+import { Dish } from './entities/dish.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repository/category.repository';
 
@@ -38,6 +40,7 @@ export class RestaurantService {
     @InjectRepository(Restaurant)
     private readonly restaurantRepo: Repository<Restaurant>,
     private readonly categoryRepo: CategoryRepository,
+    @InjectRepository(Dish) private readonly dishRepo: Repository<Dish>,
   ) {}
 
   async createRestaurant(
@@ -212,7 +215,9 @@ export class RestaurantService {
     restaurantId,
   }: RestaurantDetailInput): Promise<RestaurantDetailOutput> {
     try {
-      const restaurant = await this.restaurantRepo.findOne(restaurantId);
+      const restaurant = await this.restaurantRepo.findOne(restaurantId, {
+        relations: ['menu', 'category', 'owner'],
+      });
       if (!restaurant) {
         return {
           ok: false,
@@ -256,6 +261,38 @@ export class RestaurantService {
         totalResults,
         totalPages: Math.ceil(totalResults / 25),
       };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Unexpected error',
+      };
+    }
+  }
+
+  async createDish(
+    owner: User,
+    createDishInput: CreateDishInput,
+  ): Promise<CreateDishOutput> {
+    try {
+      const restaurant = await this.restaurantRepo.findOne(
+        createDishInput.restaurantId,
+      );
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: 'Restaurant not found',
+        };
+      }
+      if (owner.id !== restaurant.ownerId) {
+        return {
+          ok: false,
+          error: 'You are not owner of this restaurant',
+        };
+      }
+      await this.dishRepo.save(
+        this.dishRepo.create({ ...createDishInput, restaurant }),
+      );
+      return { ok: true };
     } catch (error) {
       return {
         ok: false,
