@@ -5,10 +5,11 @@ import { Restaurant } from 'src/restaurant/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { OrderItem } from './entities/order-item.entity';
-import { Order } from './entities/order.entity';
+import { Order, OrderStatus } from './entities/order.entity';
 
 @Injectable()
 export class OrderService {
@@ -138,6 +139,20 @@ export class OrderService {
     }
   }
 
+  private isAllowed(user: User, order: Order): boolean {
+    let allowed = true;
+    if (user.role === UserRole.Client && order.customerId !== user.id) {
+      allowed = false;
+    }
+    if (user.role === UserRole.Delivery && order.driverId !== user.id) {
+      allowed = false;
+    }
+    if (user.role === UserRole.Owner && order.restaurant.ownerId !== user.id) {
+      allowed = false;
+    }
+    return allowed;
+  }
+
   async getOrder(
     { id: orderId }: GetOrderInput,
     user: User,
@@ -153,20 +168,7 @@ export class OrderService {
         };
       }
 
-      let forbidden = true;
-      if (user.role === UserRole.Client && order.customerId !== user.id) {
-        forbidden = false;
-      }
-      if (user.role === UserRole.Delivery && order.driverId !== user.id) {
-        forbidden = false;
-      }
-      if (
-        user.role === UserRole.Owner &&
-        order.restaurant.ownerId !== user.id
-      ) {
-        forbidden = false;
-      }
-      if (!forbidden) {
+      if (!this.isAllowed(user, order)) {
         return {
           ok: false,
           error: 'Forbidden',
@@ -175,6 +177,69 @@ export class OrderService {
       return {
         ok: true,
         order,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Unexpected error',
+      };
+    }
+  }
+
+  async editOrder(
+    { id: orderId, status }: EditOrderInput,
+    user: User,
+  ): Promise<EditOrderOutput> {
+    try {
+      const order = await this.orderRepo.findOne(orderId, {
+        relations: ['restaurant'],
+      });
+      if (!order) {
+        return {
+          ok: false,
+          error: 'Order not found',
+        };
+      }
+
+      if (!this.isAllowed(user, order)) {
+        return {
+          ok: false,
+          error: 'Forbidden',
+        };
+      }
+
+      let canEdit = true;
+      if (user.role === UserRole.Client) {
+        canEdit = false;
+      }
+      if (user.role === UserRole.Owner) {
+        if (status !== OrderStatus.Cooking && status !== OrderStatus.Cooked) {
+          canEdit = false;
+        }
+      }
+      if (user.role === UserRole.Delivery) {
+        if (
+          status !== OrderStatus.PickedUp &&
+          status !== OrderStatus.Delivered
+        ) {
+          canEdit = false;
+        }
+      }
+      if (!canEdit) {
+        return {
+          ok: false,
+          error: 'Forbidden',
+        };
+      }
+
+      await this.orderRepo.save([
+        {
+          id: orderId,
+          status,
+        },
+      ]);
+      return {
+        ok: true,
       };
     } catch (error) {
       return {
