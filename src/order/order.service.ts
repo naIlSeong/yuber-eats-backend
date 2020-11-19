@@ -5,6 +5,7 @@ import { Restaurant } from 'src/restaurant/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { OrderItem } from './entities/order-item.entity';
 import { Order } from './entities/order.entity';
@@ -128,6 +129,52 @@ export class OrderService {
       return {
         ok: true,
         orders,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Unexpected error',
+      };
+    }
+  }
+
+  async getOrder(
+    { id: orderId }: GetOrderInput,
+    user: User,
+  ): Promise<GetOrderOutput> {
+    try {
+      const order = await this.orderRepo.findOne(orderId, {
+        relations: ['restaurant'],
+      });
+      if (!order) {
+        return {
+          ok: false,
+          error: 'Order not found',
+        };
+      }
+
+      let forbidden = true;
+      if (user.role === UserRole.Client && order.customerId !== user.id) {
+        forbidden = false;
+      }
+      if (user.role === UserRole.Delivery && order.driverId !== user.id) {
+        forbidden = false;
+      }
+      if (
+        user.role === UserRole.Owner &&
+        order.restaurant.ownerId !== user.id
+      ) {
+        forbidden = false;
+      }
+      if (!forbidden) {
+        return {
+          ok: false,
+          error: 'Forbidden',
+        };
+      }
+      return {
+        ok: true,
+        order,
       };
     } catch (error) {
       return {
