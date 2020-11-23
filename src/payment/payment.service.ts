@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Restaurant } from 'src/restaurant/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import {
   CreatePaymentInput,
   CreatePaymentOuput,
@@ -68,5 +69,19 @@ export class PaymentService {
         error: 'Unexpected error',
       };
     }
+  }
+
+  @Cron('0 0 * * * *	')
+  async checkPromotedRestaurant() {
+    const restaurants = await this.restaurantRepo.find({
+      isPromoted: true,
+      promotedUntil: LessThan(new Date()),
+    });
+    console.log(restaurants);
+    restaurants.forEach(async restaurant => {
+      restaurant.isPromoted = false;
+      restaurant.promotedUntil = null;
+      await this.restaurantRepo.save(restaurant);
+    });
   }
 }
