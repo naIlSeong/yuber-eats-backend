@@ -23,6 +23,8 @@ import { OrderModule } from './order/order.module';
 import { Order } from './order/entities/order.entity';
 import { OrderItem } from './order/entities/order-item.entity';
 import { CommonModule } from './common/common.module';
+import { PaymentModule } from './payment/payment.module';
+import { Payment } from './payment/entities/payment.entity';
 
 @Module({
   imports: [
@@ -73,6 +75,7 @@ import { CommonModule } from './common/common.module';
         Dish,
         Order,
         OrderItem,
+        Payment,
       ],
     }),
     JwtModule.forRoot({
@@ -88,6 +91,7 @@ import { CommonModule } from './common/common.module';
     RestaurantModule,
     OrderModule,
     CommonModule,
+    PaymentModule,
   ],
 })
 export class AppModule {}
