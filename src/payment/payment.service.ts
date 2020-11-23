@@ -7,6 +7,7 @@ import {
   CreatePaymentInput,
   CreatePaymentOuput,
 } from './dtos/create-payment.dto';
+import { GetPaymentOutput } from './dtos/get-payment.dto';
 import { Payment } from './entities/payment.entity';
 
 @Injectable()
@@ -41,6 +42,21 @@ export class PaymentService {
         this.paymentRepo.create({ transactionId, user: owner, restaurant }),
       );
       return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Unexpected error',
+      };
+    }
+  }
+
+  async getPayment(owner: User): Promise<GetPaymentOutput> {
+    try {
+      const payments = await this.paymentRepo.find({ user: owner });
+      return {
+        ok: true,
+        payments,
+      };
     } catch (error) {
       return {
         ok: false,

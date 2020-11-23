@@ -69,6 +69,7 @@ export class User extends CoreEntity {
   @OneToMany(
     type => Payment,
     payment => payment.user,
+    { eager: true },
   )
   payments: Payment[];
 
