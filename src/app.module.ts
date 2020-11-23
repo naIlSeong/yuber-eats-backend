@@ -19,6 +19,7 @@ import { OrderItem } from './order/entities/order-item.entity';
 import { CommonModule } from './common/common.module';
 import { PaymentModule } from './payment/payment.module';
 import { Payment } from './payment/entities/payment.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { Payment } from './payment/entities/payment.entity';
       domain: process.env.MAILGUN_DOMAIN_NAME,
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     RestaurantModule,

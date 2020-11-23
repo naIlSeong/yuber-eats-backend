@@ -41,6 +41,11 @@ export class PaymentService {
       await this.paymentRepo.save(
         this.paymentRepo.create({ transactionId, user: owner, restaurant }),
       );
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      restaurant.isPromoted = true;
+      restaurant.promotedUntil = date;
+      this.restaurantRepo.save(restaurant);
       return { ok: true };
     } catch (error) {
       return {
